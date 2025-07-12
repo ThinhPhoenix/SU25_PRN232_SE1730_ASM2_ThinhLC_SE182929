@@ -1,0 +1,83 @@
+@page "/SampleTypeThinhLCForm/{Id:int?}"
+@using DNATestingSystem.BlazorWAS.GraphQLClient.ThinhLC.Models
+@using DNATestingSystem.BlazorWAS.GraphQLClient.ThinhLC.GraphQLClients
+@inject NavigationManager Navigation
+@inject DNATestingSystem.BlazorWAS.GraphQLClient.ThinhLC.GraphQLClients.GraphQLConsumer GraphQLConsumer
+
+<h3>@(Id.HasValue ? "Sửa Sample Type" : "Thêm mới Sample Type")</h3>
+
+<EditForm Model="sampleType" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="mb-3">
+        <label class="form-label">Tên loại</label>
+        <InputText class="form-control" @bind-Value="sampleType.TypeName" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Mô tả</label>
+        <InputTextArea class="form-control" @bind-Value="sampleType.Description" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Hoạt động</label>
+        <InputCheckbox class="form-check-input" @bind-Value="isActive" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Đếm</label>
+        <InputNumber class="form-control" @bind-Value="sampleType.Count" />
+    </div>
+    <button type="submit" class="btn btn-success">@((Id.HasValue ? "Cập nhật" : "Thêm mới"))</button>
+    <button type="button" class="btn btn-secondary ms-2" @onclick="GoBack">Quay lại</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert alert-info mt-2">@message</div>
+}
+
+@code {
+    [Parameter] public int? Id { get; set; }
+    private SampleTypeThinhLc sampleType = new();
+    private string message = string.Empty;
+
+    private bool isActive
+    {
+        get => sampleType.IsActive ?? false;
+        set => sampleType.IsActive = value;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id.HasValue)
+        {
+            var result = await GraphQLConsumer.GetSampleTypeThinhLCById(Id.Value);
+            if (result != null)
+                sampleType = result;
+            else
+                message = "Không tìm thấy dữ liệu!";
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        bool success;
+        if (Id.HasValue)
+        {
+            success = await GraphQLConsumer.UpdateSampleTypeThinhLC(sampleType);
+            message = success ? "Cập nhật thành công!" : "Cập nhật thất bại!";
+        }
+        else
+        {
+            success = await GraphQLConsumer.CreateSampleTypeThinhLC(sampleType);
+            message = success ? "Thêm mới thành công!" : "Thêm mới thất bại!";
+        }
+        if (success)
+        {
+            Navigation.NavigateTo("/SampleTypeThinhLCList");
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/SampleTypeThinhLCList");
+    }
+}

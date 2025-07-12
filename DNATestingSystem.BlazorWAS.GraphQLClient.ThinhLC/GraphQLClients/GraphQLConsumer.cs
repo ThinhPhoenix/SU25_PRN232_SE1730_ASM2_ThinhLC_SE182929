@@ -425,5 +425,187 @@ namespace DNATestingSystem.BlazorWAS.GraphQLClient.ThinhLC.GraphQLClients
                 return new List<AppointmentsTienDm>();
             }
         }
+
+        public async Task<List<SampleTypeThinhLc>> GetSampleTypeThinhLCs()
+        {
+            try
+            {
+                var query = @"
+                query {
+                    sampleTypeThinhLCs {
+                        sampleTypeThinhLcid
+                        typeName
+                        description
+                        isActive
+                        count
+                        createdAt
+                        updatedAt
+                        deletedAt
+                    }
+                }";
+                var response = await _graphQLClient.SendQueryAsync<dynamic>(query);
+                if (response?.Data?.sampleTypeThinhLCs != null)
+                {
+                    var list = new List<SampleTypeThinhLc>();
+                    foreach (var item in response.Data.sampleTypeThinhLCs)
+                    {
+                        var obj = new SampleTypeThinhLc
+                        {
+                            SampleTypeThinhLcid = (int?)item.sampleTypeThinhLcid,
+                            TypeName = item.typeName,
+                            Description = item.description,
+                            IsActive = (bool?)item.isActive,
+                            Count = (int?)item.count,
+                            CreatedAt = item.createdAt != null ? DateTime.Parse(item.createdAt.ToString()) : null,
+                            UpdatedAt = item.updatedAt != null ? DateTime.Parse(item.updatedAt.ToString()) : null,
+                            DeletedAt = item.deletedAt != null ? DateTime.Parse(item.deletedAt.ToString()) : null
+                        };
+                        list.Add(obj);
+                    }
+                    return list;
+                }
+                return new List<SampleTypeThinhLc>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching sample types: {ex.Message}");
+                return new List<SampleTypeThinhLc>();
+            }
+        }
+
+        public async Task<bool> DeleteSampleTypeThinhLC(int id)
+        {
+            try
+            {
+                var mutation = @"
+                mutation($id: Int!) {
+                    deleteSampleTypeThinhLCs(id: $id)
+                }";
+                var variables = new { id = id };
+                var response = await _graphQLClient.SendMutationAsync<dynamic>(mutation, variables);
+                if (response?.Data?.deleteSampleTypeThinhLCs != null)
+                {
+                    return (bool)response.Data.deleteSampleTypeThinhLCs;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting sample type: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<SampleTypeThinhLc?> GetSampleTypeThinhLCById(int id)
+        {
+            try
+            {
+                var query = @"
+                query($id: Int!) {
+                    sampleTypeThinhLCById(id: $id) {
+                        sampleTypeThinhLcid
+                        typeName
+                        description
+                        isActive
+                        count
+                        createdAt
+                        updatedAt
+                        deletedAt
+                    }
+                }";
+                var variables = new { id = id };
+                var response = await _graphQLClient.SendQueryAsync<dynamic>(query, variables);
+                if (response?.Data?.sampleTypeThinhLCById != null)
+                {
+                    var item = response.Data.sampleTypeThinhLCById;
+                    return new SampleTypeThinhLc
+                    {
+                        SampleTypeThinhLcid = (int?)item.sampleTypeThinhLcid,
+                        TypeName = item.typeName,
+                        Description = item.description,
+                        IsActive = (bool?)item.isActive,
+                        Count = (int?)item.count,
+                        CreatedAt = item.createdAt != null ? DateTime.Parse(item.createdAt.ToString()) : null,
+                        UpdatedAt = item.updatedAt != null ? DateTime.Parse(item.updatedAt.ToString()) : null,
+                        DeletedAt = item.deletedAt != null ? DateTime.Parse(item.deletedAt.ToString()) : null
+                    };
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching sample type by id: {ex.Message}");
+                return null;
+            }
+        }
+
+        public async Task<bool> CreateSampleTypeThinhLC(SampleTypeThinhLc sampleType)
+        {
+            try
+            {
+                var mutation = @"
+                mutation($input: SampleTypeThinhLcInput!) {
+                    createSampleTypeThinhLCs(sampleTypeThinhLC: $input)
+                }";
+                var variables = new
+                {
+                    input = new
+                    {
+                        typeName = sampleType.TypeName,
+                        description = sampleType.Description,
+                        isActive = sampleType.IsActive ?? false,
+                        count = sampleType.Count,
+                        createdAt = sampleType.CreatedAt?.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+                    }
+                };
+                var response = await _graphQLClient.SendMutationAsync<dynamic>(mutation, variables);
+                if (response?.Data?.createSampleTypeThinhLCs != null)
+                {
+                    var result = (int)response.Data.createSampleTypeThinhLCs;
+                    return result > 0;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating sample type: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateSampleTypeThinhLC(SampleTypeThinhLc sampleType)
+        {
+            try
+            {
+                var mutation = @"
+                mutation($input: SampleTypeThinhLcInput!) {
+                    updateSampleTypeThinhLCs(sampleTypeThinhLC: $input)
+                }";
+                var variables = new
+                {
+                    input = new
+                    {
+                        sampleTypeThinhLcid = sampleType.SampleTypeThinhLcid,
+                        typeName = sampleType.TypeName,
+                        description = sampleType.Description,
+                        isActive = sampleType.IsActive ?? false,
+                        count = sampleType.Count,
+                        updatedAt = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+                    }
+                };
+                var response = await _graphQLClient.SendMutationAsync<dynamic>(mutation, variables);
+                if (response?.Data?.updateSampleTypeThinhLCs != null)
+                {
+                    var result = (int)response.Data.updateSampleTypeThinhLCs;
+                    return result > 0;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating sample type: {ex.Message}");
+                return false;
+            }
+        }
     }
 }

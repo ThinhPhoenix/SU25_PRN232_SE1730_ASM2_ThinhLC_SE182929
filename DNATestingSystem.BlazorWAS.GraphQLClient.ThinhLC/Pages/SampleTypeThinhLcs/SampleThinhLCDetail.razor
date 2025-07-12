@@ -1,0 +1,86 @@
+@page "/SampleTypeThinhLCDetail/{Id:int}"
+@using DNATestingSystem.BlazorWAS.GraphQLClient.ThinhLC.Models
+@using DNATestingSystem.BlazorWAS.GraphQLClient.ThinhLC.GraphQLClients
+@inject NavigationManager Navigation
+@inject GraphQLConsumer GraphQLConsumer
+@inject IJSRuntime JSRuntime
+
+<h3>Chi tiết Sample Type</h3>
+
+@if (isLoading)
+{
+    <p>Đang tải dữ liệu...</p>
+}
+else if (sampleType == null)
+{
+    <div class="alert alert-danger">Không tìm thấy dữ liệu!</div>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">ID</dt>
+                <dd class="col-sm-9">@sampleType.SampleTypeThinhLcid</dd>
+                <dt class="col-sm-3">Tên loại</dt>
+                <dd class="col-sm-9">@sampleType.TypeName</dd>
+                <dt class="col-sm-3">Mô tả</dt>
+                <dd class="col-sm-9">@sampleType.Description</dd>
+                <dt class="col-sm-3">Hoạt động</dt>
+                <dd class="col-sm-9">@(sampleType.IsActive == true ? "Có" : "Không")</dd>
+                <dt class="col-sm-3">Đếm</dt>
+                <dd class="col-sm-9">@sampleType.Count</dd>
+                <dt class="col-sm-3">Ngày tạo</dt>
+                <dd class="col-sm-9">@sampleType.CreatedAt?.ToString("dd/MM/yyyy")</dd>
+                <dt class="col-sm-3">Ngày cập nhật</dt>
+                <dd class="col-sm-9">@sampleType.UpdatedAt?.ToString("dd/MM/yyyy")</dd>
+            </dl>
+            <button class="btn btn-warning me-2" @onclick="Edit">Sửa</button>
+            <button class="btn btn-danger me-2" @onclick="ConfirmDelete">Xóa</button>
+            <button class="btn btn-secondary" @onclick="GoBack">Quay lại</button>
+        </div>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert alert-info mt-2">@message</div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private SampleTypeThinhLc? sampleType;
+    private bool isLoading = true;
+    private string message = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        sampleType = await GraphQLConsumer.GetSampleTypeThinhLCById(Id);
+        isLoading = false;
+    }
+
+    private void Edit()
+    {
+        Navigation.NavigateTo($"/SampleTypeThinhLCForm/{Id}");
+    }
+
+    private async Task ConfirmDelete()
+    {
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Bạn có chắc chắn muốn xóa sample type này?");
+        if (confirmed)
+        {
+            var result = await GraphQLConsumer.DeleteSampleTypeThinhLC(Id);
+            message = result ? "Xóa thành công!" : "Xóa thất bại!";
+            if (result)
+            {
+                Navigation.NavigateTo("/SampleTypeThinhLCList");
+            }
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/SampleTypeThinhLCList");
+    }
+}
