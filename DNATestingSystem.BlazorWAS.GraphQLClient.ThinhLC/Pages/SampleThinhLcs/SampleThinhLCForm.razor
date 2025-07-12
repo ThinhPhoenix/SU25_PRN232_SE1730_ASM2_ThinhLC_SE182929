@@ -1,0 +1,150 @@
+@page "/SampleThinhLCForm"
+@page "/SampleThinhLCForm/{Id:int}"
+@using DNATestingSystem.BlazorWAS.GraphQLClient.ThinhLC.Models
+@using DNATestingSystem.BlazorWAS.GraphQLClient.ThinhLC.Models.DTOs
+@using DNATestingSystem.BlazorWAS.GraphQLClient.ThinhLC.Models.Extensions
+@using DNATestingSystem.BlazorWAS.GraphQLClient.ThinhLC.GraphQLClients
+@inject GraphQLConsumer GraphQLConsumer
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">@(IsEdit ? "Sửa Sample" : "Thêm Sample Mới")</h4>
+                </div>
+                <div class="card-body">
+                    @if (isLoading)
+                    {
+                        <div class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+
+                        <EditForm Model="@sampleDto" OnValidSubmit="@HandleValidSubmit">
+                            <DataAnnotationsValidator />
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="profileId" class="form-label">Profile <span
+                                                class="text-danger">*</span>:</label> <select id="profileId"
+                                            class="form-select" @bind="sampleDto.ProfileThinhLcid">
+                                            <option value="">-- Chọn Profile --</option>
+                                            @if (profiles.Any())
+                                            {
+                                                @foreach (var profile in profiles)
+                                                {
+                                                    <option value="@profile.ProfileThinhLcid">@profile.FullName
+                                                        (@profile.NationalId)</option>
+                                                }
+                                            }
+                                        </select>
+                                        <ValidationMessage For="@(() => sampleDto.ProfileThinhLcid)" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="sampleTypeId" class="form-label">Sample Type <span
+                                                class="text-danger">*</span>:</label> <select id="sampleTypeId"
+                                            class="form-select" @bind="sampleDto.SampleTypeThinhLcid">
+                                            <option value="">-- Chọn Sample Type --</option>
+                                            @if (sampleTypes.Any())
+                                            {
+                                                @foreach (var sampleType in sampleTypes)
+                                                {
+                                                    <option value="@sampleType.SampleTypeThinhLcid">@sampleType.TypeName</option>
+                                                }
+                                            }
+                                        </select>
+                                        <ValidationMessage For="@(() => sampleDto.SampleTypeThinhLcid)" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="appointmentId" class="form-label">Appointment:</label> <select
+                                            id="appointmentId" class="form-select" @bind="sampleDto.AppointmentsTienDmid">
+                                            <option value="">-- Chọn Appointment --</option>
+                                            @if (appointments.Any())
+                                            { @foreach (var appointment in appointments)
+                                                {
+                                                    <option value="@appointment.AppointmentsTienDmid">
+                                                        @appointment.AppointmentDate.ToString("dd/MM/yyyy") -
+                                                        @appointment.ContactPhone
+                                                    </option>
+                                                }
+                                            }
+                                        </select>
+                                        <ValidationMessage For="@(() => sampleDto.AppointmentsTienDmid)" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="count" class="form-label">Count:</label>
+                                        <InputNumber id="count" class="form-control" @bind-Value="sampleDto.Count"
+                                            min="1" />
+                                        <ValidationMessage For="@(() => sampleDto.Count)" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="notes" class="form-label">Notes:</label>
+                                <InputTextArea id="notes" class="form-control" rows="3" @bind-Value="sampleDto.Notes"
+                                    placeholder="Nhập ghi chú..." />
+                                <ValidationMessage For="@(() => sampleDto.Notes)" />
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="collectedAt" class="form-label">Collected At:</label>
+                                        <InputDate id="collectedAt" class="form-control"
+                                            @bind-Value="sampleDto.CollectedAt" />
+                                        <ValidationMessage For="@(() => sampleDto.CollectedAt)" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="mb-3 form-check">
+                                        <input type="checkbox" id="isProcessed" class="form-check-input"
+                                            @bind="sampleDto.IsProcessed" />
+                                        <label for="isProcessed" class="form-check-label">Is Processed</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-secondary" @onclick="NavigateBack">
+                                    <i class="fas fa-arrow-left"></i> Quay lại
+                                </button>
+                                <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+                                    @if (isSubmitting)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                    }
+                                    <i class="fas fa-save"></i> @(IsEdit ? "Cập nhật" : "Thêm mới")
+                                </button>
+                            </div>
+                        </EditForm>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+                                           
+                                           
+
+

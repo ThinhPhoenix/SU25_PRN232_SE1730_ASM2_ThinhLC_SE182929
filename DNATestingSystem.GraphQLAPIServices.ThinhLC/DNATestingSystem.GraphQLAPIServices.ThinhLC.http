@@ -1,0 +1,6 @@
+@DNATestingSystem.GraphQLAPIServices.ThinhLC_HostAddress = http://localhost:5185
+
+GET {{DNATestingSystem.GraphQLAPIServices.ThinhLC_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
