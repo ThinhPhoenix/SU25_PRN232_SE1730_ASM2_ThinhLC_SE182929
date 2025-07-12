@@ -45,7 +45,7 @@ namespace DNATestingSystem.BlazorWAS.GraphQLClient.ThinhLC.Pages.SampleTypeThinh
         {
             if (id.HasValue)
             {
-                Navigation.NavigateTo($"/SampleTypeThinhLCForm/{id.Value}");
+                Navigation.NavigateTo($"/SampleTypeThinhLCForm/{id.Value}", true);
             }
         }
 

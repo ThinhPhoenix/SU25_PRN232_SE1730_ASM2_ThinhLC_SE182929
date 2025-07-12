@@ -61,6 +61,19 @@ namespace DNATestingSystem.GraphQLAPIServices.ThinhLC.GraphQLs
             }
         }
 
+        public async Task<SampleTypeThinhLc?> GetSampleTypeThinhLCById(int id)
+        {
+            try
+            {
+                var result = await _serviceProvider.SampleTypeThinhLCService.GetByIdAsync(id);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new GraphQLException($"Error retrieving sample type: {ex.Message}");
+            }
+        }
+
         public async Task<IEnumerable<AppointmentsTienDm>> GetAppointmentsTienDMs()
         {
             try

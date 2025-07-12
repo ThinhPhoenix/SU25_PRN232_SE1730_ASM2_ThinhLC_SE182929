@@ -46,5 +46,46 @@ namespace DNATestingSystem.GraphQLAPIServices.ThinhLC.GraphQLs
                 return false;
             }
         }
+
+        public async Task<int> CreateSampleTypeThinhLCs(SampleTypeThinhLcInput sampleTypeThinhLC)
+        {
+            try
+            {
+                var entity = sampleTypeThinhLC.ToEntity();
+                var result = await _serviceProvider.SampleTypeThinhLCService.CreateAsync(entity);
+                return (int)result;
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
+        }
+
+        public async Task<int> UpdateSampleTypeThinhLCs(SampleTypeThinhLcInput sampleTypeThinhLC)
+        {
+            try
+            {
+                var entity = sampleTypeThinhLC.ToEntity();
+                var result = await _serviceProvider.SampleTypeThinhLCService.UpdateAsync(entity);
+                return (int)result;
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
+        }
+
+        public async Task<bool> DeleteSampleTypeThinhLCs(int id)
+        {
+            try
+            {
+                var result = await _serviceProvider.SampleTypeThinhLCService.RemoveAsync(id);
+                return result;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
     }
 }
