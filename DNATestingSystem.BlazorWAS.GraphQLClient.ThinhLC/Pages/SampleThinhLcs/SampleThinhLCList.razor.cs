@@ -6,19 +6,33 @@ namespace DNATestingSystem.BlazorWAS.GraphQLClient.ThinhLC.Pages.SampleThinhLcs
 {
     public partial class SampleThinhLCList
     {
-        private List<SampleThinhLcGraphQLResponse> samples = new List<SampleThinhLcGraphQLResponse>();
+        private List<SampleThinhLcGraphQLResponse> samples = new();
         private bool isLoading = true;
+        private int currentPage = 1;
+        private int totalPages = 1;
 
         protected override async Task OnInitializedAsync()
         {
-            await LoadSamples();
+            // Kiểm tra đăng nhập (ví dụ: kiểm tra localStorage)
+            var user = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "currentUser");
+            if (string.IsNullOrEmpty(user))
+            {
+                Navigation.NavigateTo("/");
+                return;
+            }
+            await LoadSamples(currentPage);
         }
-        private async Task LoadSamples()
+
+        private async Task LoadSamples(int page)
         {
             isLoading = true;
             try
             {
-                samples = await GraphQLConsumer.GetSampleThinhLCs() ?? new List<SampleThinhLcGraphQLResponse>();
+                var result = await GraphQLConsumer.GetSampleThinhLCPaged(page);
+                Console.WriteLine("Paged result: " + System.Text.Json.JsonSerializer.Serialize(result));
+                samples = result?.Items ?? new List<SampleThinhLcGraphQLResponse>();
+                currentPage = result?.CurrentPage ?? 1;
+                totalPages = result?.TotalPages ?? 1;
             }
             catch (Exception ex)
             {
@@ -29,6 +43,24 @@ namespace DNATestingSystem.BlazorWAS.GraphQLClient.ThinhLC.Pages.SampleThinhLcs
             {
                 isLoading = false;
             }
+        }
+
+        private async Task PreviousPage()
+        {
+            if (currentPage > 1)
+                await LoadSamples(currentPage - 1);
+        }
+
+        private async Task NextPage()
+        {
+            if (currentPage < totalPages)
+                await LoadSamples(currentPage + 1);
+        }
+
+        private async Task GoToPage(int page)
+        {
+            if (page != currentPage)
+                await LoadSamples(page);
         }
 
         private void NavigateToAdd()
@@ -72,7 +104,7 @@ namespace DNATestingSystem.BlazorWAS.GraphQLClient.ThinhLC.Pages.SampleThinhLcs
                 if (success)
                 {
                     await JSRuntime.InvokeVoidAsync("alert", "Xóa thành công!");
-                    await LoadSamples(); // Reload the list
+                    await LoadSamples(currentPage); // Reload the current page
                 }
                 else
                 {

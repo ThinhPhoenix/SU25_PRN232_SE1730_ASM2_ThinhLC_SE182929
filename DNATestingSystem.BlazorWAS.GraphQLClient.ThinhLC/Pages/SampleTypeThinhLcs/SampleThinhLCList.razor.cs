@@ -1,21 +1,26 @@
 using DNATestingSystem.BlazorWAS.GraphQLClient.ThinhLC.GraphQLClients;
 using DNATestingSystem.BlazorWAS.GraphQLClient.ThinhLC.Models;
 using Microsoft.JSInterop;
-using Microsoft.AspNetCore.Components;
 
 namespace DNATestingSystem.BlazorWAS.GraphQLClient.ThinhLC.Pages.SampleTypeThinhLcs
 {
     public partial class SampleThinhLCList
+
+
     {
-        [Inject] private NavigationManager Navigation { get; set; } = default!;
-        [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
-        [Inject] private GraphQLConsumer GraphQLConsumer { get; set; } = default!;
 
         private List<SampleTypeThinhLc> sampleTypes = new List<SampleTypeThinhLc>();
         private bool isLoading = true;
 
         protected override async Task OnInitializedAsync()
         {
+            // Kiểm tra đăng nhập (ví dụ: kiểm tra localStorage)
+            var user = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "currentUser");
+            if (string.IsNullOrEmpty(user))
+            {
+                Navigation.NavigateTo("/");
+                return;
+            }
             await LoadSampleTypes();
         }
         private async Task LoadSampleTypes()

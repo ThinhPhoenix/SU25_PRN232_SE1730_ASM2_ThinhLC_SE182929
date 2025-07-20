@@ -21,6 +21,7 @@ namespace DNATestingSystem.Repository.ThinhLC
                 .Include(s => s.SampleTypeThinhLc)
                 .Include(s => s.ProfileThinhLc)
                 .Include(s => s.AppointmentsTienDm)
+                .OrderBy(s => s.CollectedAt)
                 .ToListAsync();
             return samples ?? new List<SampleThinhLc>();
         }

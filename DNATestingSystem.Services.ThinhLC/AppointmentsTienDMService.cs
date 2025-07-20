@@ -11,8 +11,15 @@ namespace DNATestingSystem.Services.ThinhLC
     public class AppointmentsTienDMService : IAppointmentsTienDMService
     {
         private readonly AppointmentsTienDMRepository _repository;
-        public AppointmentsTienDMService()
-            => _repository = new AppointmentsTienDMRepository();
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IServiceProviders _serviceProviders;
+
+        public AppointmentsTienDMService(AppointmentsTienDMRepository repository, IUnitOfWork unitOfWork, IServiceProviders serviceProviders)
+        {
+            _repository = repository;
+            _unitOfWork = unitOfWork;
+            _serviceProviders = serviceProviders;
+        }
 
         public async Task<List<AppointmentsTienDm>> GetAllAsync()
         {

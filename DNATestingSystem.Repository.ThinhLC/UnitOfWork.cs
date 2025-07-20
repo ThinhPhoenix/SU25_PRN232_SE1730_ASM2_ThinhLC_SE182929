@@ -17,6 +17,7 @@ namespace DNATestingSystem.Repository.ThinhLC
         int SaveChangesWithTransaction();
         Task<int> SaveChangesWithTransactionAsync();
     }
+
     public class UnitOfWork : IUnitOfWork
     {
         private readonly Se18Prn232Se1730G3DnatestingSystemContext _context;
@@ -26,25 +27,28 @@ namespace DNATestingSystem.Repository.ThinhLC
         private ProfileThinhLCRepository _profileThinhLCRepository;
         private AppointmentsTienDMRepository _appointmentsTienDMRepository;
 
-
-    public UnitOfWork() => _context ??= new Se18Prn232Se1730G3DnatestingSystemContext();
+        public UnitOfWork() => _context ??= new Se18Prn232Se1730G3DnatestingSystemContext();
 
         public SystemUserAccountRepository SystemUserAccountRepository
         {
             get { return _systemUserAccountRepository ??= new SystemUserAccountRepository(_context); }
         }
+
         public SampleThinhLCRepository SampleThinhLCRepository
         {
             get { return _sampleThinhLCRepository ??= new SampleThinhLCRepository(_context); }
         }
+
         public SampleTypeThinhLCRepository SampleTypeThinhLCRepository
         {
             get { return _sampleTypeThinhLCRepository ??= new SampleTypeThinhLCRepository(_context); }
         }
+
         public ProfileThinhLCRepository ProfileThinhLCRepository
         {
             get { return _profileThinhLCRepository ??= new ProfileThinhLCRepository(_context); }
         }
+
         public AppointmentsTienDMRepository AppointmentsTienDMRepository
         {
             get { return _appointmentsTienDMRepository ??= new AppointmentsTienDMRepository(_context); }
@@ -55,7 +59,6 @@ namespace DNATestingSystem.Repository.ThinhLC
         public int SaveChangesWithTransaction()
         {
             int result = -1;
-
             //System.Data.IsolationLevel.Snapshot
             using (var dbContextTransaction = _context.Database.BeginTransaction())
             {
@@ -71,14 +74,12 @@ namespace DNATestingSystem.Repository.ThinhLC
                     dbContextTransaction.Rollback();
                 }
             }
-
             return result;
         }
 
         public async Task<int> SaveChangesWithTransactionAsync()
         {
             int result = -1;
-
             //System.Data.IsolationLevel.Snapshot
             using (var dbContextTransaction = _context.Database.BeginTransaction())
             {
@@ -94,7 +95,6 @@ namespace DNATestingSystem.Repository.ThinhLC
                     dbContextTransaction.Rollback();
                 }
             }
-
             return result;
         }
     }

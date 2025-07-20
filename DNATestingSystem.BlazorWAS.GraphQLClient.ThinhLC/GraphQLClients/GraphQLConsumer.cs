@@ -7,7 +7,39 @@ using System.Linq;
 namespace DNATestingSystem.BlazorWAS.GraphQLClient.ThinhLC.GraphQLClients
 {
     public class GraphQLConsumer
+
     {
+        public async Task<SystemUserAccount?> Login(string username, string password)
+        {
+            try
+            {
+                var query = @"
+                query($username: String!, $password: String!) {
+                    login(username: $username, password: $password) {
+                        userAccountId
+                        userName
+                    }
+                }";
+                var variables = new { username, password };
+                var response = await _graphQLClient.SendQueryAsync<dynamic>(query, variables);
+                if (response?.Data?.login != null)
+                {
+                    var item = response.Data.login;
+                    return new SystemUserAccount
+                    {
+                        UserAccountId = (int)item.userAccountId,
+                        UserName = item.username?.ToString(),
+                        // Thêm ánh xạ các trường khác nếu cần
+                    };
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Login error: {ex.Message}");
+                return null;
+            }
+        }
         private readonly IGraphQLClient _graphQLClient;
         public GraphQLConsumer(IGraphQLClient graphQLClient)
             => _graphQLClient = graphQLClient;
@@ -605,6 +637,93 @@ namespace DNATestingSystem.BlazorWAS.GraphQLClient.ThinhLC.GraphQLClients
             {
                 Console.WriteLine($"Error updating sample type: {ex.Message}");
                 return false;
+            }
+        }
+
+        // Model cho kết quả phân trang
+        public class PaginationResult<T>
+        {
+            public T? Items { get; set; }
+            public int CurrentPage { get; set; }
+            public int TotalPages { get; set; }
+            public int TotalCount { get; set; }
+        }
+
+        // Thêm vào cuối class GraphQLConsumer
+        public async Task<PaginationResult<List<SampleThinhLcGraphQLResponse>>> GetSampleThinhLCPaged(int page)
+        {
+            try
+            {
+                var query = @"
+                query($page: Int!) {
+                    sampleThinhLCPaged(page: $page) {
+                        items {
+                            sampleThinhLcid
+                            profileThinhLcid
+                            sampleTypeThinhLcid
+                            appointmentsTienDmid
+                            notes
+                            isProcessed
+                            count
+                            collectedAt
+                            createdAt
+                            updatedAt
+                            deletedAt
+                        }
+                        currentPage
+                        totalPages
+                        totalItems
+                    }
+                }";
+
+                var variables = new { page = page };
+                var response = await _graphQLClient.SendQueryAsync<dynamic>(query, variables);
+                if (response?.Data?.sampleThinhLCPaged != null)
+                {
+                    var paged = response.Data.sampleThinhLCPaged;
+                    var items = new List<SampleThinhLcGraphQLResponse>();
+                    foreach (var item in paged.items)
+                    {
+                        items.Add(new SampleThinhLcGraphQLResponse
+                        {
+                            SampleThinhLcid = (int?)item.sampleThinhLcid,
+                            ProfileThinhLcid = (int?)item.profileThinhLcid,
+                            SampleTypeThinhLcid = (int?)item.sampleTypeThinhLcid,
+                            AppointmentsTienDmid = (int?)item.appointmentsTienDmid,
+                            Notes = item.notes?.ToString(),
+                            IsProcessed = (bool?)item.isProcessed,
+                            Count = (int?)item.count,
+                            CollectedAt = item.collectedAt != null ? DateTime.Parse(item.collectedAt.ToString()) : null,
+                            CreatedAt = item.createdAt != null ? DateTime.Parse(item.createdAt.ToString()) : null,
+                            UpdatedAt = item.updatedAt != null ? DateTime.Parse(item.updatedAt.ToString()) : null,
+                            DeletedAt = item.deletedAt != null ? DateTime.Parse(item.deletedAt.ToString()) : null
+                        });
+                    }
+                    return new PaginationResult<List<SampleThinhLcGraphQLResponse>>
+                    {
+                        Items = items,
+                        CurrentPage = (int)paged.currentPage,
+                        TotalPages = (int)paged.totalPages,
+                        TotalCount = (int)paged.totalItems // Đúng trường backend trả về
+                    };
+                }
+                return new PaginationResult<List<SampleThinhLcGraphQLResponse>>
+                {
+                    Items = new List<SampleThinhLcGraphQLResponse>(),
+                    CurrentPage = 1,
+                    TotalPages = 1,
+                    TotalCount = 0
+                };
+            }
+            catch (Exception)
+            {
+                return new PaginationResult<List<SampleThinhLcGraphQLResponse>>
+                {
+                    Items = new List<SampleThinhLcGraphQLResponse>(),
+                    CurrentPage = 1,
+                    TotalPages = 1,
+                    TotalCount = 0
+                };
             }
         }
     }

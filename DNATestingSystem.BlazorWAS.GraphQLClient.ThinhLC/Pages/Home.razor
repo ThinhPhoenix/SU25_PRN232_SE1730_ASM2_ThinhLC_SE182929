@@ -1,7 +1,71 @@
 ﻿@page "/"
+@using System.ComponentModel.DataAnnotations
+@using DNATestingSystem.BlazorWAS.GraphQLClient.ThinhLC.GraphQLClients
+@inject GraphQLConsumer GraphQLConsumer
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Login</PageTitle>
 
-<h1>Hello, world!</h1>
+<h3>Đăng nhập hệ thống</h3>
+<EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="mb-3">
+        <label for="username" class="form-label">Tên đăng nhập</label>
+        <InputText id="username" class="form-control" @bind-Value="loginModel.Username" />
+    </div>
+    <div class="mb-3">
+        <label for="password" class="form-label">Mật khẩu</label>
+        <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" />
+    </div>
+    <button type="submit" class="btn btn-primary" disabled="@(isLoading)">Đăng nhập</button>
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="text-danger mt-2">@errorMessage</div>
+    }
+</EditForm>
 
-Welcome to your new app.
+@code {
+    private LoginModel loginModel = new();
+    private bool isLoading = false;
+    private string? errorMessage;
+
+    private async Task HandleLogin()
+    {
+        isLoading = true;
+        errorMessage = null;
+        try
+        {
+            var result = await GraphQLConsumer.Login(loginModel.Username, loginModel.Password);
+            if (result != null)
+            {
+                // Lưu user xuống localStorage
+                await JSRuntime.InvokeVoidAsync("localStorage.setItem", "currentUser",
+                System.Text.Json.JsonSerializer.Serialize(result));
+                // Đăng nhập thành công, chuyển hướng sang trang chính
+                Navigation.NavigateTo("/SampleThinhLCList");
+            }
+            else
+            {
+                errorMessage = "Sai tên đăng nhập hoặc mật khẩu.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Lỗi: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    public class LoginModel
+    {
+        [Required(ErrorMessage = "Vui lòng nhập tên đăng nhập")]
+        public string Username { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Vui lòng nhập mật khẩu")]
+        public string Password { get; set; } = string.Empty;
+    }
+}

@@ -11,8 +11,15 @@ namespace DNATestingSystem.Services.ThinhLC
     public class SampleTypeThinhLCService : ISampleTypeThinhLCService
     {
         private readonly SampleTypeThinhLCRepository _repository;
-        public SampleTypeThinhLCService()
-            => _repository = new SampleTypeThinhLCRepository();
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IServiceProviders _serviceProviders;
+
+        public SampleTypeThinhLCService(SampleTypeThinhLCRepository repository, IUnitOfWork unitOfWork, IServiceProviders serviceProviders)
+        {
+            _repository = repository;
+            _unitOfWork = unitOfWork;
+            _serviceProviders = serviceProviders;
+        }
 
         public async Task<List<SampleTypeThinhLc>> GetAllAsync()
         {
